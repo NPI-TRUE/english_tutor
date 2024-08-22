@@ -3,6 +3,7 @@ from flask_cors import CORS
 import torch
 from TTS.api import TTS
 import time
+import os
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
@@ -40,6 +41,10 @@ def message():
 def audio():
     if request.method == "OPTIONS":
         return '', 200
+
+    # Crea la cartella audio se non esiste già
+    if not os.path.exists('audio'):
+        os.makedirs('audio')
 
     data = request.get_json()
     message = data["message"]
