@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { MessageRole } from "./enums/MessageRole";
 import { Conversations } from "./types";
 import { ChatUI } from "./components/chat-ui/ChatUI";
@@ -7,7 +7,7 @@ import { faMailReply } from "@fortawesome/free-solid-svg-icons";
 
 const TEST_USER_INFO = { firstName: "Test", lastName: "User" };
 function App() {
-  const url = 'http://localhost:5000'
+  const url = 'http://localhost:5000';
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
 
   const [chatConversations, setChatConversations] = useState<Conversations>([
@@ -19,8 +19,9 @@ function App() {
     }
   ]);
 
+
   const create_audio = useCallback(async (val: string, id: string) => {
-    const res_audio = await fetch(url + '/api/v1/audio', {
+    const res_audio = await fetch(`${url}/api/v1/audio`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -40,7 +41,7 @@ function App() {
     );
   }, []);
 
-  const handleSubmit = useCallback(async (value: string) => {
+  const handleSubmit = useCallback(async (value: string, model_type: string) => {
     setIsQuerying(true);
     setChatConversations((conversations) => [
       ...conversations,
@@ -52,7 +53,7 @@ function App() {
       },
     ]);
 
-    const res = await fetch(url + '/api/v1/message', {
+    const res = await fetch(`${url}/api/v1/${model_type}/message`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

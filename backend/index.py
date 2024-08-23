@@ -4,6 +4,8 @@ import torch
 from TTS.api import TTS
 import time
 import os
+import requests
+from llama_index.llms.ollama import Ollama
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
@@ -12,8 +14,8 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 def home():
     return "online"
 
-@app.route('/api/v1/message', methods=['POST', "OPTIONS"]) 
-def message():
+@app.route('/api/v1/groq/message', methods=['POST', "OPTIONS"]) 
+def message_groq():
     if request.method == "OPTIONS":
         return '', 200
 
@@ -36,6 +38,22 @@ def message():
     print(model_response)
 
     return model_response
+
+@app.route('/api/v1/ollama/message', methods=['POST', "OPTIONS"]) 
+def message_ollama():
+    if request.method == "OPTIONS":
+        return '', 200
+
+    data = request.get_json()
+    message = data["message"][:-1]
+
+    llm = Ollama(model="llama3.1:latest", request_timeout=120.0)
+
+    resp = llm.complete(message)
+
+    print(resp.text)
+
+    return resp.text
 
 @app.route('/api/v1/audio', methods=['POST', "OPTIONS"])
 def audio():

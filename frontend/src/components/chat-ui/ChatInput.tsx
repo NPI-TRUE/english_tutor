@@ -9,6 +9,7 @@ export const ChatInput = ({
   onSubmit,
   placeholder,
   customSubmitIcon,
+  selectRef,
 }: IChatInputProps) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -18,7 +19,8 @@ export const ChatInput = ({
       const textArea = textAreaRef?.current;
       if (textArea && textArea.value.trim().length > 0) {
         if (onSubmit) {
-          onSubmit(textArea.value);
+          console.log('selectRef', selectRef.current?.value)
+          onSubmit(textArea.value, selectRef.current?.value);
         }
         textArea.value = "";
       }
