@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { MessageRole } from "./enums/MessageRole";
 import { Conversations } from "./types";
 import { ChatUI } from "./components/chat-ui/ChatUI";
@@ -7,7 +7,7 @@ import { faMailReply } from "@fortawesome/free-solid-svg-icons";
 
 const TEST_USER_INFO = { firstName: "Test", lastName: "User" };
 function App() {
-  const url = 'http://localhost:5000';
+  const url = 'http://127.0.0.1:5000';
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
 
   const [chatConversations, setChatConversations] = useState<Conversations>([
@@ -53,12 +53,12 @@ function App() {
       },
     ]);
 
-    const res = await fetch(`${url}/api/v1/${model_type}/message`, {
+    const res = await fetch(`${url}/api/v1/message`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message: value }),
+      body: JSON.stringify({ message: value, model_type: model_type }),
     });
 
     const val = await res.text()
@@ -76,7 +76,8 @@ function App() {
       },
     ]);
 
-    create_audio(val, new_id);
+    //Disattivato perché con la libreria tts ci mette troppo tempo a generare l'audio
+    //create_audio(val, new_id);
   }, []);
 
   return (
@@ -87,6 +88,7 @@ function App() {
       disabled={isQuerying}
       conversations={chatConversations}
       customSubmitIcon={<FontAwesomeIcon icon={faMailReply} />}
+      url={url}
     />
   );
 }

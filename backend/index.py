@@ -6,54 +6,105 @@ import time
 import os
 import requests
 from llama_index.llms.ollama import Ollama
+from dotenv import load_dotenv
+from litellm import completion
+import os
+from llama_index.core.llms import ChatMessage
+
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+CORS(app)
 
 @app.route('/')
 def home():
     return "online"
 
-@app.route('/api/v1/groq/message', methods=['POST', "OPTIONS"]) 
-def message_groq():
+@app.route('/api/v1/message', methods=['POST', "OPTIONS"]) 
+def message():
     if request.method == "OPTIONS":
         return '', 200
 
     data = request.get_json()
-    message = data["message"][:-1]
+    message = data["message"].strip()
+    model_type= data["model_type"]
 
-    from litellm import completion
-    import os
+    if (model_type == "groq"):
+        os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
+        response = completion(
+            model="groq/llama3-8b-8192", 
+            messages=[
+            {"role": "user", "content": message}
+        ],
+        )
 
-    os.environ['GROQ_API_KEY'] = "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"
-    response = completion(
-        model="groq/llama3-8b-8192", 
-        messages=[
-        {"role": "user", "content": message}
-    ],
-    )
+        model_response = response.choices[0].message.content
 
-    model_response = response.choices[0].message.content
+        print(model_response)
 
-    print(model_response)
+        return model_response
+    
+    
+    message = data["message"].strip()
 
-    return model_response
-
-@app.route('/api/v1/ollama/message', methods=['POST', "OPTIONS"]) 
-def message_ollama():
-    if request.method == "OPTIONS":
-        return '', 200
-
-    data = request.get_json()
-    message = data["message"][:-1]
-
-    llm = Ollama(model="llama3.1:latest", request_timeout=120.0)
+    llm = Ollama(model=model_type, request_timeout=120.0)
 
     resp = llm.complete(message)
 
     print(resp.text)
 
     return resp.text
+
+
+@app.route('/api/v1/message/check', methods=['POST', "OPTIONS"]) 
+def message_check():
+    if request.method == "OPTIONS":
+        return '', 200
+    
+    prompt = 'I want you to act as a spoken English teacher and improver. The answer must contain ONLY the rewritten sentence or the word "Correct". Your task is to check the grammatical correctness of my sentence, if there are any mistakes or the sentence is not structured in proper English rewrite my sentence in a correct form otherwise answer with "Correct", this is the sentence to analyze: '
+    
+    data = request.get_json()
+    message = data["message"].strip()
+    model_type= data["model_type"]
+
+    msg = prompt + message
+
+    if (model_type == "groq"):
+        os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
+        response = completion(
+            model="groq/gemma2-9b-it", 
+            messages=[
+            {"role": "user", "content": msg}
+        ],
+        )
+
+        model_response = response.choices[0].message.content
+
+        print(model_response)
+
+        return model_response
+    
+    llm = Ollama(model=model_type, request_timeout=120.0)
+
+    tmp = 'The answer must contain ONLY the rewritten sentence or the word "Correct"'
+
+    print(message)
+
+    messages = [
+        ChatMessage(
+        role="system", content='I want you to act as a spoken English teacher and improver. Your task is to check the grammatical correctness of my sentence, if there are any mistakes rewrite my sentence in a correct form otherwise answer with "Correct"'
+        ),
+        ChatMessage(role="user", content=message),
+    ]
+    resp = llm.stream_chat(messages)
+
+    ans = ""
+
+    for r in resp:
+        ans += r.delta
+
+    return ans
+    
 
 @app.route('/api/v1/audio', methods=['POST', "OPTIONS"])
 def audio():

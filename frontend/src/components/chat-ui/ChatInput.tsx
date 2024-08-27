@@ -19,7 +19,6 @@ export const ChatInput = ({
       const textArea = textAreaRef?.current;
       if (textArea && textArea.value.trim().length > 0) {
         if (onSubmit) {
-          console.log('selectRef', selectRef.current?.value)
           onSubmit(textArea.value, selectRef.current?.value);
         }
         textArea.value = "";

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ChatConversations } from "./ChatConversations";
 import { ChatInput } from "./ChatInput";
 import { IChatUIProps } from "../../types";
@@ -11,10 +11,31 @@ export const ChatUI = ({
   customSubmitIcon,
   placeholder,
   onSubmit,
+  url,
 }: IChatUIProps) => {
   const chatConversationsContainerRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState('groq');
   const selectRef = useRef<HTMLSelectElement>(null); // Crea una reference per Select
+  const [ollamaModel, setOllamaModel] = useState<string[]>([]);
+
+  const fetch_ollama_model = () => {
+    fetch("http://localhost:11434/api/tags")
+    .then(response => response.json())
+    .then(data => {
+      data.models.forEach((model: { name: string }) => {
+        console.log(model, model.name);
+        setOllamaModel(prevOllamaModel => {
+          if (!prevOllamaModel.includes(model.name)) {
+            return [...prevOllamaModel, model.name];
+          } else return prevOllamaModel;
+        });
+      });
+    });
+  }
+
+  useEffect(() => {
+    fetch_ollama_model();
+  }, []);
 
   return (
     <div style={{ height: "calc(100vh - 68px)" }}>
@@ -23,7 +44,11 @@ export const ChatUI = ({
         <Select.Option value={'default'} disabled>
           Select model host
         </Select.Option>
-        <Select.Option value={'ollama'}>ollama</Select.Option>
+        {
+          ollamaModel.map((model) => {
+            return <Select.Option value={model} key={model}>ollama/{model}</Select.Option>
+          })
+        }
         <Select.Option value={'groq'}>groq</Select.Option>
       </Select>
     </div>
@@ -36,6 +61,8 @@ export const ChatUI = ({
           conversations={conversations}
           isQuerying={isQuerying}
           chatConversationsContainerRef={chatConversationsContainerRef}
+          model_type={value}
+          url={url}
         />
       </div>
       <div className="absolute bottom-12 left-0 w-full">
