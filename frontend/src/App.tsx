@@ -7,7 +7,7 @@ import { faMailReply } from "@fortawesome/free-solid-svg-icons";
 
 const TEST_USER_INFO = { firstName: "Test", lastName: "User" };
 function App() {
-  const url = 'http://127.0.0.1:5000';
+  const url = 'http://192.168.1.145:7123';
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
 
   const [chatConversations, setChatConversations] = useState<Conversations>([
@@ -21,7 +21,7 @@ function App() {
 
 
   const create_audio = useCallback(async (val: string, id: string) => {
-    const res_audio = await fetch(`${url}/api/v1/audio`, {
+    const res_audio = await fetch(`${url}/api/v1/audio/fast`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -77,12 +77,13 @@ function App() {
     ]);
 
     //Disattivato perché con la libreria tts ci mette troppo tempo a generare l'audio
-    //create_audio(val, new_id);
+    create_audio(val, new_id);
   }, []);
 
   return (
     <ChatUI
       isQuerying={isQuerying}
+      setIsQuerying={setIsQuerying}
       onSubmit={handleSubmit}
       placeholder="Type here to interact with this demo"
       disabled={isQuerying}

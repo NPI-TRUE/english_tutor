@@ -23,6 +23,7 @@ export type Conversations = Array<Message>;
 
 export interface IChatUIProps {
   isQuerying: boolean;
+  setIsQuerying: (isQuerying: boolean) => void;
   onSubmit: (value: string, model_type: string) => Promise<void>;
   placeholder: string;
   disabled: boolean;
@@ -33,10 +34,12 @@ export interface IChatUIProps {
 
 export interface IChatInputProps {
   disabled: boolean;
+  setIsQuerying: (isQuerying: boolean) => void;
   onSubmit: (value: string, model_type: string) => Promise<void>
   placeholder: string;
   customSubmitIcon?: ReactNode;
   selectRef: RefObject<HTMLSelectElement>;
+  url: string;
 }
 
 export interface IChatConversationsProps {

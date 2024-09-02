@@ -1,15 +1,16 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 import torch
 from TTS.api import TTS
-import time
 import os
-import requests
 from llama_index.llms.ollama import Ollama
 from dotenv import load_dotenv
 from litellm import completion
 import os
 from llama_index.core.llms import ChatMessage
+import uuid
+import whisper
+from gtts import gTTS
 
 load_dotenv()
 
@@ -29,12 +30,14 @@ def message():
     message = data["message"].strip()
     model_type= data["model_type"]
 
+    prompt = "I want you to act as a spoken English teacher and improver. I will speak to you in English and you will reply to me in English to practice my spoken English. I want you to keep your reply neat, limiting the reply to 100 words. I want you to ask me a question in your reply. Now let's start practicing, you could ask me a question first."
+
     if (model_type == "groq"):
         os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
         response = completion(
             model="groq/llama3-8b-8192", 
             messages=[
-            {"role": "user", "content": message}
+            {"role": "user", "content": prompt + " This is the user message: " + message}
         ],
         )
 
@@ -43,11 +46,17 @@ def message():
         print(model_response)
 
         return model_response
-    
-    
-    message = data["message"].strip()
 
     llm = Ollama(model=model_type, request_timeout=120.0)
+
+    messages = [
+        ChatMessage(
+        role="system", content=prompt,
+        ),
+        ChatMessage(role="user", content=message),
+    ]
+
+    resp = llm.stream_chat(messages)
 
     resp = llm.complete(message)
 
@@ -86,8 +95,6 @@ def message_check():
     
     llm = Ollama(model=model_type, request_timeout=120.0)
 
-    tmp = 'The answer must contain ONLY the rewritten sentence or the word "Correct"'
-
     print(message)
 
     messages = [
@@ -104,6 +111,37 @@ def message_check():
         ans += r.delta
 
     return ans
+
+
+@app.route('/api/v1/uploads', methods=['POST', "OPTIONS"])
+def uploads():
+    if request.method == "OPTIONS":
+        return jsonify({"options": "ok"}), 200
+    
+    # Crea la cartella audio se non esiste già
+    if not os.path.exists('user_audio'):
+        os.makedirs('user_audio')
+    
+    file = request.files['file']
+
+    # Controlla se il file ha un nome valido
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    
+
+    file_name = uuid.uuid4().hex + ".wav"
+    audio_path = os.path.join("user_audio", file_name)
+    file.save(audio_path)
+    
+    model = whisper.load_model("base")
+    result = model.transcribe(audio_path)
+
+    print("Risultato della trascrizione: ", result["text"])
+
+    os.remove(audio_path)
+
+    return jsonify({"transcription": result["text"]}), 200
+    
     
 
 @app.route('/api/v1/audio', methods=['POST', "OPTIONS"])
@@ -112,8 +150,8 @@ def audio():
         return '', 200
 
     # Crea la cartella audio se non esiste già
-    if not os.path.exists('audio'):
-        os.makedirs('audio')
+    if not os.path.exists('ai_audio'):
+        os.makedirs('ai_audio')
 
     data = request.get_json()
     message = data["message"]
@@ -127,10 +165,30 @@ def audio():
     tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
 
     # Text to speech to a file
-    output_file = f"audio/output_{time.time()}.mp3"
+    output_file = f"ai_audio/output_{uuid.uuid4()}.mp3"
     tts.tts_to_file(text=message, speaker_wav="female.wav", language="en", file_path=output_file)
 
     return send_file(output_file, as_attachment=True)
 
+@app.route('/api/v1/audio/fast', methods=['POST', "OPTIONS"])
+def audio_fast():
+    if request.method == "OPTIONS":
+        return '', 200
+
+    # Crea la cartella audio se non esiste già
+    if not os.path.exists('ai_audio'):
+        os.makedirs('ai_audio')
+
+    data = request.get_json()
+    message = data["message"]
+
+    tts = gTTS(message)
+
+    output_file = f"ai_audio/output_{uuid.uuid4()}.mp3"
+
+    tts.save(output_file)
+
+    return send_file(output_file, as_attachment=True)
+
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=7123, debug=True, host="0.0.0.0")

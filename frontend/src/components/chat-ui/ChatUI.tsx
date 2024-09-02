@@ -2,10 +2,11 @@ import { useRef, useState, useEffect } from "react";
 import { ChatConversations } from "./ChatConversations";
 import { ChatInput } from "./ChatInput";
 import { IChatUIProps } from "../../types";
-import {Select } from "react-daisyui";
+import { Select } from "react-daisyui";
 
 export const ChatUI = ({
   disabled,
+  setIsQuerying,
   conversations,
   isQuerying,
   customSubmitIcon,
@@ -19,11 +20,10 @@ export const ChatUI = ({
   const [ollamaModel, setOllamaModel] = useState<string[]>([]);
 
   const fetch_ollama_model = () => {
-    fetch("http://localhost:11434/api/tags")
+    fetch("http://192.168.1.145:11434/api/tags")
     .then(response => response.json())
     .then(data => {
       data.models.forEach((model: { name: string }) => {
-        console.log(model, model.name);
         setOllamaModel(prevOllamaModel => {
           if (!prevOllamaModel.includes(model.name)) {
             return [...prevOllamaModel, model.name];
@@ -68,10 +68,12 @@ export const ChatUI = ({
       <div className="absolute bottom-12 left-0 w-full">
         <ChatInput
           disabled={disabled}
+          setIsQuerying={setIsQuerying}
           customSubmitIcon={customSubmitIcon}
           onSubmit={onSubmit}
           selectRef={selectRef}
           placeholder={placeholder}
+          url={url}
         />
       </div>
     </div>
