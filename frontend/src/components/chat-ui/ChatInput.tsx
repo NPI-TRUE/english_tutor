@@ -11,8 +11,8 @@ export const ChatInput = ({
   placeholder,
   customSubmitIcon,
   selectRef,
-  url,
 }: IChatInputProps) => {
+  const url = import.meta.env.VITE_REACT_APP_URL + ":7123";
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -20,7 +20,6 @@ export const ChatInput = ({
 
   useEffect(() => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      console.log('getUserMedia supportato.');
   
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
@@ -53,8 +52,10 @@ export const ChatInput = ({
 
             const data = await res.json();
 
-            if (data.transcription != "")
-              onSubmit(data.transcription, selectRef.current?.value);
+            if (data.transcription != "") {
+              const selectedValue = selectRef.current?.value || "";
+              onSubmit(data.transcription, selectedValue);
+            }  
 
             setIsQuerying(false);
           };    
@@ -66,21 +67,16 @@ export const ChatInput = ({
   }, []);
   
   const startRecording = () => {
-    console.log("Start recording...");
     setIsRecording(true);
     if (mediaRecorder) {
       mediaRecorder.start();
-      console.log('Registrazione in corso...');
     }
   };
   
   const stopRecording = () => {
-    console.log("Stop recording...");
-  
     setIsRecording(false);
     if (mediaRecorder) {
       mediaRecorder.stop();
-      console.log('Registrazione terminata.');
     }
   };
 
@@ -90,7 +86,8 @@ export const ChatInput = ({
       const textArea = textAreaRef?.current;
       if (textArea && textArea.value.trim().length > 0) {
         if (onSubmit) {
-          onSubmit(textArea.value, selectRef.current?.value);
+          const selectedValue = selectRef.current?.value || "";
+          onSubmit(textArea.value, selectedValue);
         }
         textArea.value = "";
       }

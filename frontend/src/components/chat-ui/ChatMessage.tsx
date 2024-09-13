@@ -12,7 +12,8 @@ import { IChatMessageProps } from "../../types";
 import { MessageRole } from "../../enums/MessageRole";
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 
-export const ChatMessage = ({ message, model_type, url }: IChatMessageProps) => {
+export const ChatMessage = ({ message, model_type }: IChatMessageProps) => {
+  const url = import.meta.env.VITE_REACT_APP_URL + ":7123";
   const messageRef = useRef<HTMLDivElement>(null);
   const [, copy] = useCopyToClipboard();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -23,8 +24,6 @@ export const ChatMessage = ({ message, model_type, url }: IChatMessageProps) => 
 
   const handleShow = useCallback(() => {
     ref_modal.current?.showModal();
-
-    console.log(modalContent);
 
     if (!hasCheckedText) {
       check_text();

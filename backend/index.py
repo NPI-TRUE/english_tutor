@@ -1,7 +1,6 @@
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 import torch
-from TTS.api import TTS
 import os
 from llama_index.llms.ollama import Ollama
 from dotenv import load_dotenv
@@ -11,6 +10,8 @@ from llama_index.core.llms import ChatMessage
 import uuid
 import whisper
 from gtts import gTTS
+
+### from TTS.api import TTS
 
 load_dotenv()
 
@@ -29,40 +30,43 @@ def message():
     data = request.get_json()
     message = data["message"].strip()
     model_type= data["model_type"]
+    msg = data["chatHistory"]
 
     prompt = "I want you to act as a spoken English teacher and improver. I will speak to you in English and you will reply to me in English to practice my spoken English. I want you to keep your reply neat, limiting the reply to 100 words. I want you to ask me a question in your reply. Now let's start practicing, you could ask me a question first."
 
     if (model_type == "groq"):
         os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
+
+        msg.append({"role": "system", "content": prompt})
+        msg.append({"role": "user", "content": message})
+
         response = completion(
             model="groq/llama3-8b-8192", 
-            messages=[
-            {"role": "user", "content": prompt + " This is the user message: " + message}
-        ],
+            messages=msg,
         )
 
         model_response = response.choices[0].message.content
 
-        print(model_response)
-
         return model_response
+    
+    llm = Ollama(model=model_type, request_timeout=120.0, base_url=os.getenv('host_ollama'))
 
-    llm = Ollama(model=model_type, request_timeout=120.0)
+    messages = []
 
-    messages = [
-        ChatMessage(
-        role="system", content=prompt,
-        ),
-        ChatMessage(role="user", content=message),
-    ]
+    for m in msg:
+        messages.append(ChatMessage(role=m["role"], content=m["content"]))
+
+    messages.append(ChatMessage(role="system", content=prompt))
+    messages.append(ChatMessage(role="user", content=message))
 
     resp = llm.stream_chat(messages)
 
-    resp = llm.complete(message)
+    ans = ""
 
-    print(resp.text)
+    for r in resp:
+        ans += r.delta
 
-    return resp.text
+    return ans
 
 
 @app.route('/api/v1/message/check', methods=['POST', "OPTIONS"]) 
@@ -89,13 +93,9 @@ def message_check():
 
         model_response = response.choices[0].message.content
 
-        print(model_response)
-
         return model_response
     
-    llm = Ollama(model=model_type, request_timeout=120.0)
-
-    print(message)
+    llm = Ollama(model=model_type, request_timeout=120.0, base_url=os.getenv('host_ollama'))
 
     messages = [
         ChatMessage(
@@ -136,14 +136,13 @@ def uploads():
     model = whisper.load_model("base")
     result = model.transcribe(audio_path)
 
-    print("Risultato della trascrizione: ", result["text"])
-
     os.remove(audio_path)
 
     return jsonify({"transcription": result["text"]}), 200
     
-    
 
+### Problems due to conflicts between dependency versions
+"""
 @app.route('/api/v1/audio', methods=['POST', "OPTIONS"])
 def audio():
     if request.method == "OPTIONS":
@@ -169,6 +168,7 @@ def audio():
     tts.tts_to_file(text=message, speaker_wav="female.wav", language="en", file_path=output_file)
 
     return send_file(output_file, as_attachment=True)
+"""
 
 @app.route('/api/v1/audio/fast', methods=['POST', "OPTIONS"])
 def audio_fast():
@@ -191,4 +191,4 @@ def audio_fast():
     return send_file(output_file, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(port=7123, debug=True, host="0.0.0.0")
+    app.run(port=7123, host="0.0.0.0")

@@ -29,7 +29,6 @@ export interface IChatUIProps {
   disabled: boolean;
   conversations: Conversations;
   customSubmitIcon?: ReactNode;
-  url: string;
 }
 
 export interface IChatInputProps {
@@ -39,7 +38,6 @@ export interface IChatInputProps {
   placeholder: string;
   customSubmitIcon?: ReactNode;
   selectRef: RefObject<HTMLSelectElement>;
-  url: string;
 }
 
 export interface IChatConversationsProps {
@@ -47,11 +45,9 @@ export interface IChatConversationsProps {
   isQuerying: boolean;
   chatConversationsContainerRef: RefObject<HTMLDivElement>;
   model_type: string;
-  url: string;
 }
 
 export interface IChatMessageProps {
   message: Message;
   model_type: string;
-  url: string;
 }

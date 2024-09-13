@@ -12,15 +12,15 @@ export const ChatUI = ({
   customSubmitIcon,
   placeholder,
   onSubmit,
-  url,
 }: IChatUIProps) => {
+  const url = import.meta.env.VITE_REACT_APP_URL;
   const chatConversationsContainerRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState('groq');
   const selectRef = useRef<HTMLSelectElement>(null); // Crea una reference per Select
   const [ollamaModel, setOllamaModel] = useState<string[]>([]);
 
   const fetch_ollama_model = () => {
-    fetch("http://192.168.1.145:11434/api/tags")
+    fetch(url + ":11434/api/tags")
     .then(response => response.json())
     .then(data => {
       data.models.forEach((model: { name: string }) => {
@@ -62,7 +62,6 @@ export const ChatUI = ({
           isQuerying={isQuerying}
           chatConversationsContainerRef={chatConversationsContainerRef}
           model_type={value}
-          url={url}
         />
       </div>
       <div className="absolute bottom-12 left-0 w-full">
@@ -73,7 +72,6 @@ export const ChatUI = ({
           onSubmit={onSubmit}
           selectRef={selectRef}
           placeholder={placeholder}
-          url={url}
         />
       </div>
     </div>

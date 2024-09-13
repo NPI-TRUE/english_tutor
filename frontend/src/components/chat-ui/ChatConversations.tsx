@@ -8,7 +8,6 @@ export const ChatConversations = ({
   isQuerying,
   chatConversationsContainerRef,
   model_type,
-  url,
 }: IChatConversationsProps) => {
   useEffect(() => {
     const chatConversationsContainer = chatConversationsContainerRef?.current;
@@ -28,7 +27,6 @@ export const ChatConversations = ({
             key={`chatbot-message-${chatEntry.id}`}
             message={chatEntry}
             model_type={model_type}
-            url={url}
           />
         ))}
       {isQuerying && (

@@ -6,8 +6,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMailReply } from "@fortawesome/free-solid-svg-icons";
 
 const TEST_USER_INFO = { firstName: "Test", lastName: "User" };
+
+interface ChatMessage {
+  role: string;
+  content: string;
+}
+
 function App() {
-  const url = 'http://192.168.1.145:7123';
+  const url = import.meta.env.VITE_REACT_APP_URL + ":7123";
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
 
   const [chatConversations, setChatConversations] = useState<Conversations>([
@@ -15,10 +21,11 @@ function App() {
       id: "1",
       role: MessageRole.ASSISTANT,
       message:
-        "I am a sample chat ui made by Kevin Wong (@pragmaticgeek).  This is a demo on how to build a simple React chat ui from scratch.",
+        "Hi, I'm a chatbot programmed to help you learn English, start by asking me a question.",
     }
   ]);
 
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
   const create_audio = useCallback(async (val: string, id: string) => {
     const res_audio = await fetch(`${url}/api/v1/audio/fast`, {
@@ -58,13 +65,15 @@ function App() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message: value, model_type: model_type }),
+      body: JSON.stringify({ chatHistory: chatHistory, message: value, model_type: model_type }),
     });
 
     const val = await res.text()
 
     setIsQuerying(false);
     const new_id = (Date.now()).toString();
+
+    setChatHistory((prevHistory) => [...prevHistory, {"role": "user", "content": value}, {"role": "system", "content": val}]);
     
     setChatConversations((conversations) => [
       ...conversations,
@@ -78,7 +87,7 @@ function App() {
 
     //Disattivato perché con la libreria tts ci mette troppo tempo a generare l'audio
     create_audio(val, new_id);
-  }, []);
+  }, [chatHistory]);
 
   return (
     <ChatUI
@@ -89,7 +98,6 @@ function App() {
       disabled={isQuerying}
       conversations={chatConversations}
       customSubmitIcon={<FontAwesomeIcon icon={faMailReply} />}
-      url={url}
     />
   );
 }
