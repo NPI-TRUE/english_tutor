@@ -5,6 +5,8 @@ WORKDIR /app
 COPY setup.py .
 RUN pip install .
 
+RUN apt-get update && apt-get install -y ffmpeg
+
 COPY . .
 
 EXPOSE 7123
