@@ -29,6 +29,8 @@ export interface IChatUIProps {
   disabled: boolean;
   conversations: Conversations;
   customSubmitIcon?: ReactNode;
+  toggle: boolean;
+  setToggle: (toggle: boolean) => void;
 }
 
 export interface IChatInputProps {
@@ -45,9 +47,11 @@ export interface IChatConversationsProps {
   isQuerying: boolean;
   chatConversationsContainerRef: RefObject<HTMLDivElement>;
   model_type: string;
+  toggle: boolean;
 }
 
 export interface IChatMessageProps {
   message: Message;
   model_type: string;
+  toggle: boolean;
 }

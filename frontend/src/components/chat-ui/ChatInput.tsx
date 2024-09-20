@@ -52,12 +52,13 @@ export const ChatInput = ({
 
             const data = await res.json();
 
+
+            setIsQuerying(false);
+
             if (data.transcription != "") {
               const selectedValue = selectRef.current?.value || "";
               onSubmit(data.transcription, selectedValue);
-            }  
-
-            setIsQuerying(false);
+            } 
           };    
         })
         .catch(error => {

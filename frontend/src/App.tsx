@@ -15,6 +15,7 @@ interface ChatMessage {
 function App() {
   const url = import.meta.env.VITE_REACT_APP_URL + ":7123";
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
+  const [toggle, setToggle] = useState(true);
 
   const [chatConversations, setChatConversations] = useState<Conversations>([
     {
@@ -84,8 +85,7 @@ function App() {
         audioQuerying: true,
       },
     ]);
-
-    //Disattivato perché con la libreria tts ci mette troppo tempo a generare l'audio
+    
     create_audio(val, new_id);
   }, [chatHistory]);
 
@@ -98,6 +98,8 @@ function App() {
       disabled={isQuerying}
       conversations={chatConversations}
       customSubmitIcon={<FontAwesomeIcon icon={faMailReply} />}
+      toggle={toggle}
+      setToggle={setToggle}
     />
   );
 }

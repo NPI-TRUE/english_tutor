@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { ChatConversations } from "./ChatConversations";
 import { ChatInput } from "./ChatInput";
 import { IChatUIProps } from "../../types";
-import { Select } from "react-daisyui";
+import { Select, Toggle } from "react-daisyui";
 
 export const ChatUI = ({
   disabled,
@@ -12,6 +12,8 @@ export const ChatUI = ({
   customSubmitIcon,
   placeholder,
   onSubmit,
+  toggle,
+  setToggle,
 }: IChatUIProps) => {
   const url = import.meta.env.VITE_REACT_APP_URL;
   const chatConversationsContainerRef = useRef<HTMLDivElement>(null);
@@ -51,6 +53,8 @@ export const ChatUI = ({
         }
         <Select.Option value={'groq'}>groq</Select.Option>
       </Select>
+      <label className="p-4">Autoplay</label>
+      <Toggle onChange={() => setToggle(!toggle)} checked={toggle} style={{"marginLeft": "-10px"}} className="m-2" />
     </div>
       <div
         ref={chatConversationsContainerRef}
@@ -62,6 +66,7 @@ export const ChatUI = ({
           isQuerying={isQuerying}
           chatConversationsContainerRef={chatConversationsContainerRef}
           model_type={value}
+          toggle={toggle}
         />
       </div>
       <div className="absolute bottom-12 left-0 w-full">

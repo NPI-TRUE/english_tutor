@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Loading, Avatar, Button, Modal, } from "react-daisyui";
 import {
@@ -12,7 +12,7 @@ import { IChatMessageProps } from "../../types";
 import { MessageRole } from "../../enums/MessageRole";
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 
-export const ChatMessage = ({ message, model_type }: IChatMessageProps) => {
+export const ChatMessage = ({ message, model_type, toggle }: IChatMessageProps) => {
   const url = import.meta.env.VITE_REACT_APP_URL + ":7123";
   const messageRef = useRef<HTMLDivElement>(null);
   const [, copy] = useCopyToClipboard();
@@ -47,6 +47,14 @@ export const ChatMessage = ({ message, model_type }: IChatMessageProps) => {
   }
 
   const isBot = message.role !== MessageRole.USER;
+
+  useEffect(() => {
+    if (toggle) {
+      if (message.audioFile) {
+        play_audio(message.audioFile);
+      }
+    }
+  }, [message.audioQuerying]);
 
   const play_audio = (audioFile: Blob) => {
     if (!audioRef.current) {
