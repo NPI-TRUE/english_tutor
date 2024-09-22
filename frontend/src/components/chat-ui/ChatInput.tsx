@@ -12,13 +12,14 @@ export const ChatInput = ({
   customSubmitIcon,
   selectRef,
 }: IChatInputProps) => {
-  const url = import.meta.env.VITE_REACT_APP_URL + ":7123";
+  const url = import.meta.env.VITE_REACT_APP_URL;
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
+
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
   
       navigator.mediaDevices.getUserMedia({ audio: true })
@@ -106,7 +107,7 @@ export const ChatInput = ({
   );
 
   return (
-    <div className="flex justify-center items-center">
+    <div className="flex justify-center items-center" style={{"marginTop": "15px"}}>
       <Textarea
         ref={textAreaRef}
         bordered

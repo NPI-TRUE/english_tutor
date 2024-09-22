@@ -1,12 +1,10 @@
 services:
-  server:
+  backend:
     build: ./backend
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
       - host_ollama=http://${MY_IP}:11434
-    ports:
-      - "7123:7123"
     networks:
       - app-network
 
@@ -15,13 +13,22 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      - VITE_REACT_APP_URL=http://${MY_IP}
-    ports:
-      - "5173:5173"
+      - VITE_REACT_APP_URL=https://${MY_IP}
     networks:
       - app-network
     depends_on:
-      - server
+      - backend
+
+  nginx:
+    build: .
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+      - client
 
 networks:
   app-network:

@@ -21,18 +21,9 @@ export const ChatUI = ({
   const selectRef = useRef<HTMLSelectElement>(null); // Crea una reference per Select
   const [ollamaModel, setOllamaModel] = useState<string[]>([]);
 
-  const fetch_ollama_model = () => {
-    fetch(url + ":11434/api/tags")
-    .then(response => response.json())
-    .then(data => {
-      data.models.forEach((model: { name: string }) => {
-        setOllamaModel(prevOllamaModel => {
-          if (!prevOllamaModel.includes(model.name)) {
-            return [...prevOllamaModel, model.name];
-          } else return prevOllamaModel;
-        });
-      });
-    });
+  const fetch_ollama_model = async () => {
+    let models: { tags: string[] } = JSON.parse(await (await fetch(url + "/api/v1/getOllamaTags")).text());
+    setOllamaModel(models.tags);
   }
 
   useEffect(() => {

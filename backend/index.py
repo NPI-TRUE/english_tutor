@@ -10,6 +10,8 @@ from llama_index.core.llms import ChatMessage
 import uuid
 import whisper
 from gtts import gTTS
+import requests
+import json
 
 ### from TTS.api import TTS
 
@@ -18,7 +20,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
+@app.route('/api/v1/home', methods=['GET'])
 def home():
     return "online"
 
@@ -68,6 +70,34 @@ def message():
 
     return ans
 
+@app.route('/api/v1/getOllamaTags', methods=['POST', "OPTIONS", "GET"])
+def get_ollama_tags():
+    if request.method == "OPTIONS":
+        return '', 200
+
+    host_ollama = os.getenv('host_ollama')
+
+    model_name = []
+
+    try:
+        response = requests.get(f"{host_ollama}/api/tags")
+        response.raise_for_status()  # Verifica se la richiesta ha avuto successo
+        data = response.text
+        data = json.loads(data)
+    except requests.exceptions.RequestException as e:
+        return str(e), 500  # Restituisce l'errore come stringa con codice di stato 500
+
+    print(data)
+
+    for model in data["models"]:
+        print(model)
+        model_name.append(model["name"])
+
+    print(model_name)
+
+    return jsonify({"tags": model_name})
+
+    
 
 @app.route('/api/v1/message/check', methods=['POST', "OPTIONS"]) 
 def message_check():

@@ -4,7 +4,7 @@ setup(
     name='my_project',
     version='0.1',
     install_requires=[
-        'flask',
+        'flask[async]',
         'flask_cors',
         'torch',
         'llama-index-llms-ollama',
@@ -13,6 +13,7 @@ setup(
         'llama-index-llms-openai',
         'uuid',
         'openai-whisper',
-        'gtts'
+        'gtts',
+        'requests'
     ],
 )

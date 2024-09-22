@@ -13,7 +13,7 @@ import { MessageRole } from "../../enums/MessageRole";
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 
 export const ChatMessage = ({ message, model_type, toggle }: IChatMessageProps) => {
-  const url = import.meta.env.VITE_REACT_APP_URL + ":7123";
+  const url = import.meta.env.VITE_REACT_APP_URL;
   const messageRef = useRef<HTMLDivElement>(null);
   const [, copy] = useCopyToClipboard();
   const [isPlaying, setIsPlaying] = useState(false);

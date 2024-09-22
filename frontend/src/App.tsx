@@ -13,7 +13,7 @@ interface ChatMessage {
 }
 
 function App() {
-  const url = import.meta.env.VITE_REACT_APP_URL + ":7123";
+  const url = import.meta.env.VITE_REACT_APP_URL;
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
   const [toggle, setToggle] = useState(true);
 
