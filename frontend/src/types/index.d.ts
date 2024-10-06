@@ -14,7 +14,9 @@ export type Message = {
   message: string;
   userInfo?: User;
   audioFile?: File | Blob;
+  audioName?: string;
   audioQuerying?: boolean;
+  audioFetch?: boolean;
 };
 
 export type Conversations = Array<Message>;

@@ -1,9 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MessageRole } from "./enums/MessageRole";
 import { Conversations } from "./types";
 import { ChatUI } from "./components/chat-ui/ChatUI";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMailReply } from "@fortawesome/free-solid-svg-icons";
+import { v4 as uuidv4 } from 'uuid';
 
 const TEST_USER_INFO = { firstName: "Test", lastName: "User" };
 
@@ -21,20 +22,34 @@ function App() {
     {
       id: "1",
       role: MessageRole.ASSISTANT,
-      message:
-        "Hi, I'm a chatbot programmed to help you learn English, start by asking me a question.",
-    }
+      message: "Hi, I'm a chatbot programmed to help you learn English, start by asking me a question.",
+    },
   ]);
 
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  useEffect(() => {
+    (async () => {
+      const res = await await fetch(`${url}/api/v1/get_chat_history`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      const val = await res.text();
+      const jsonVal = JSON.parse(val);
 
-  const create_audio = useCallback(async (val: string, id: string) => {
+      setChatConversations(jsonVal);
+    })();
+  }, []);
+
+  const create_audio = useCallback(async (val: string, id: string, idChat: string) => {
     const res_audio = await fetch(`${url}/api/v1/audio/fast`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message: val }),
+      body: JSON.stringify({ message: val, idChat: idChat }),
+      credentials: 'include',
     });
 
     const audioBlob = await res_audio.blob();
@@ -51,6 +66,7 @@ function App() {
 
   const handleSubmit = useCallback(async (value: string, model_type: string) => {
     setIsQuerying(true);
+    
     setChatConversations((conversations) => [
       ...conversations,
       {
@@ -66,16 +82,18 @@ function App() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ chatHistory: chatHistory, message: value, model_type: model_type }),
+      body: JSON.stringify({ message: value, model_type: model_type }),
+      credentials: 'include',
     });
 
-    const val = await res.text()
+    const valText = await res.text()
+    const val_real = JSON.parse(valText);
+    const val = val_real.model_response;
+    const id = val_real.id;
 
     setIsQuerying(false);
-    const new_id = (Date.now()).toString();
+    const new_id = (uuidv4()).toString();
 
-    setChatHistory((prevHistory) => [...prevHistory, {"role": "user", "content": value}, {"role": "system", "content": val}]);
-    
     setChatConversations((conversations) => [
       ...conversations,
       {
@@ -86,8 +104,10 @@ function App() {
       },
     ]);
     
-    create_audio(val, new_id);
-  }, [chatHistory]);
+    create_audio(val, new_id, id);
+  }, []);
+
+  
 
   return (
     <ChatUI

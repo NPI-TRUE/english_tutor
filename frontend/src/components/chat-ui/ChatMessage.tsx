@@ -31,7 +31,6 @@ export const ChatMessage = ({ message, model_type, toggle }: IChatMessageProps) 
     }
   }, [ref_modal, hasCheckedText]);
 
-
   const check_text = async () => {
     const res = await fetch(`${url}/api/v1/message/check`, {
       method: 'POST',
@@ -72,6 +71,33 @@ export const ChatMessage = ({ message, model_type, toggle }: IChatMessageProps) 
     }
   };
 
+  const play_audio_button = async () => {
+    if (message.audioFile) {
+      play_audio(message.audioFile);
+    } else if (message.audioName) {
+      message.audioQuerying = true;
+      
+      const res_audio = await fetch(`${url}/api/v1/get_audio`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ audioName: message.audioName }),
+        credentials: 'include',
+      });
+
+      const audioBlob = await res_audio.blob();
+      
+      message.audioQuerying = false;
+      message.audioFile = audioBlob;
+
+      play_audio(audioBlob);
+
+    } else {
+      console.error("Audio file is not defined");
+    }
+  }
+
   return (
     <div className="mt-4">
       <div className="flex items-center">
@@ -103,13 +129,7 @@ export const ChatMessage = ({ message, model_type, toggle }: IChatMessageProps) 
             {!message.audioQuerying && <Button size="sm" shape="square" color="ghost">
               <FontAwesomeIcon
                 icon={faPlay}
-                onClick={() => {
-                  if (message.audioFile) {
-                    play_audio(message.audioFile);
-                  } else {
-                    console.error("Audio file is not defined");
-                  }
-                }}
+                onClick={() => play_audio_button()}
               />
             </Button>}
             {
