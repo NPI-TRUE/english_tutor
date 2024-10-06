@@ -1,17 +1,16 @@
 services:
   backend:
-    build: ./backend
+    image: ghcr.io/npi-true/english-tutor-backend:latest
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
       - host_ollama=http://host.docker.internal:11434
 
   client:
-    build: ./frontend
+    image: ghcr.io/npi-true/english-tutor-frontend:latest
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    environment:
-      - VITE_REACT_APP_URL=
     depends_on:
       - backend
 
@@ -20,6 +19,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./certs:/etc/ssl/certs/
     depends_on:
       - backend
       - client

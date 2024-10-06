@@ -1,7 +1,9 @@
 import  { useState } from 'react';
+import { Button } from 'react-daisyui';
 
 const Login = () => {
   const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const url = import.meta.env.VITE_REACT_APP_URL;
 
@@ -39,12 +41,14 @@ const Login = () => {
               className="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 text-center"
             />
           </div>
-          <button
+          <Button
             type="submit"
             className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition duration-300"
+            onClick={() => setLoading(!loading)}
+            loading={loading}
           >
             Login
-          </button>
+          </Button>
         </form>
       </div>
     </div>

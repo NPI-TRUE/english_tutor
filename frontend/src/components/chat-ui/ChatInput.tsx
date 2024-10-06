@@ -49,6 +49,7 @@ export const ChatInput = ({
             const res = await fetch(url + '/api/v1/uploads', {
               method: 'POST',
               body: formData,
+              credentials: 'include',
             })
 
             const data = await res.json();

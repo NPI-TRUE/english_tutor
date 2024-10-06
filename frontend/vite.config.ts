@@ -6,7 +6,7 @@ import tailwindcss from 'tailwindcss';
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    host: "0.0.0.0", // Specifica l'IP, '0.0.0.0' per accettare connessioni da qualsiasi IP
-    port: 5173, // Specifica la porta desiderata
+    host: "0.0.0.0",
+    port: 5173,
   },
 })

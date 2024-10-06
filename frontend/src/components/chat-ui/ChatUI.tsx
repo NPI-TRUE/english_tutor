@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { ChatConversations } from "./ChatConversations";
 import { ChatInput } from "./ChatInput";
 import { IChatUIProps } from "../../types";
-import { Select, Toggle } from "react-daisyui";
+import { Select, Toggle, Button } from "react-daisyui";
 
 export const ChatUI = ({
   disabled,
@@ -20,6 +20,7 @@ export const ChatUI = ({
   const [value, setValue] = useState('groq');
   const selectRef = useRef<HTMLSelectElement>(null); // Crea una reference per Select
   const [ollamaModel, setOllamaModel] = useState<string[]>([]);
+  const [clear_session_loading, setClearSessionLoading] = useState(false);
 
   const fetch_ollama_model = async () => {
     let models: { tags: string[] } = JSON.parse(await (await fetch(url + "/api/v1/getOllamaTags")).text());
@@ -29,6 +30,20 @@ export const ChatUI = ({
   useEffect(() => {
     fetch_ollama_model();
   }, []);
+
+  const clear_session = async () => {
+    setClearSessionLoading(true);
+    await fetch(url + "/api/v1/clear_session", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+    });
+    document.cookie = 'session_id=; Max-Age=0; path=/; domain=' + window.location.hostname;
+    setClearSessionLoading(false);
+    window.location.reload();
+  }
 
   return (
     <div style={{ height: "calc(100vh - 68px)" }}>
@@ -46,6 +61,9 @@ export const ChatUI = ({
       </Select>
       <label className="p-4">Autoplay</label>
       <Toggle onChange={() => setToggle(!toggle)} checked={toggle} style={{"marginLeft": "-10px"}} className="m-2" />
+      <Button loading={clear_session_loading} onClick={() => clear_session()} style={{"marginLeft": "10%"}} color="error">
+        Esci
+      </Button>
     </div>
       <div
         ref={chatConversationsContainerRef}

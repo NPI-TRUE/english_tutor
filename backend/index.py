@@ -48,6 +48,19 @@ def set_session():
 
     return response
 
+@app.route('/api/v1/clear_session', methods=['POST', "OPTIONS"])
+def clear_session():
+    if request.method == "OPTIONS":
+        return '', 200
+
+    for msg in session["chatConversations"]:
+        if "audioName" in msg:
+            os.remove(f"ai_audio/{msg['audioName']}")
+
+    session.clear()
+
+    return 'Session data cleared', 200
+
 @app.route('/api/v1/get_chat_history', methods=['POST', "OPTIONS"])
 def get_chat_history():
     if request.method == "OPTIONS":
@@ -224,7 +237,7 @@ def uploads():
     audio_path = os.path.join("user_audio", file_name)
     file.save(audio_path)
     
-    model = whisper.load_model("medium")
+    model = whisper.load_model("small.en")
     result = model.transcribe(audio_path)
 
     os.remove(audio_path)

@@ -38,6 +38,7 @@ export const ChatMessage = ({ message, model_type, toggle }: IChatMessageProps) 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ message: messageRef.current?.innerHTML, model_type: model_type }),
+      credentials: 'include',
     });
 
     const text = await res.text();

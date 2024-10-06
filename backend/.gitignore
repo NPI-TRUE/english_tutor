@@ -1,7 +1,6 @@
 /audio/*.mp3
 /ai_audio/*.mp3
 /user_audio/*.wav
-.env
 build/
 my_project.egg-info/
 node_modules/*
